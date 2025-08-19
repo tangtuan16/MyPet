@@ -1,6 +1,7 @@
 package org.example.mypet.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.mypet.DTO.Auth.UserRegister;
 import org.example.mypet.Models.Role;
 import org.example.mypet.Models.User;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;

@@ -1,9 +1,11 @@
 package org.example.mypet.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -38,7 +40,13 @@ public class User {
     )
     private Set<Role> roles;
 
-    private Double rate;
     private LocalDate hireDate;
 
+    @OneToMany(mappedBy = "employee")
+    @JsonIgnore
+    private List<Attendance> attendances;
+
+    @OneToMany(mappedBy = "employee")
+    @JsonIgnore
+    private List<Salary> salaries;
 }

@@ -9,6 +9,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
+@Setter
 public class UserDTO {
     private long id;
     private String username;

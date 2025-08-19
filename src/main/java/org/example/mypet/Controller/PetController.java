@@ -11,6 +11,7 @@ import org.example.mypet.Utils.ApiResponse;
 import org.example.mypet.Utils.Mapper.PetMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -37,13 +38,13 @@ public class PetController {
         List<String> sortList = Arrays.stream(sort).toList();
 
         PageMeta meta = new PageMeta(
-                        petsPage.getNumber(),
-                        petsPage.getSize(),
-                        petsPage.getTotalElements(),
-                        petsPage.getTotalPages(),
+                petsPage.getNumber(),
+                petsPage.getSize(),
+                petsPage.getTotalElements(),
+                petsPage.getTotalPages(),
                 sortList,
                 petsPage.isLast()
-                );
+        );
 
         return ApiResponse.success(
                 content,
@@ -75,6 +76,7 @@ public class PetController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<PetDTO>> deletePet(@PathVariable Long id) {
         return ApiResponse.success(

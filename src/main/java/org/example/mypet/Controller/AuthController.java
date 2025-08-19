@@ -2,6 +2,7 @@ package org.example.mypet.Controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.mypet.DTO.Auth.JwtResponse;
 import org.example.mypet.DTO.Auth.RefreshTokenRequest;
 import org.example.mypet.DTO.Auth.ResetPasswordRequest;
@@ -17,12 +18,16 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
     private final AuthService authService;
     private final JwtService jwtService;
 
     @PostMapping("/register")
-    private ResponseEntity<ApiResponse<Boolean>> createUser(@Valid @RequestBody UserRegister ur) {
+    public ResponseEntity<ApiResponse<Boolean>> createUser(@Valid @RequestBody UserRegister ur) {
+        log.info("Creating user {}", ur.getUsername());
+        log.info("AuthServiceT {}", authService);
+        log.info("JwtService {}", jwtService);
         return ApiResponse.success(authService.createUser(ur), HttpStatus.CREATED.value(), "Register Successful!", null);
     }
 

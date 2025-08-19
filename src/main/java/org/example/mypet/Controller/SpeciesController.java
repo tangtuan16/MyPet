@@ -2,6 +2,7 @@ package org.example.mypet.Controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.mypet.Service.SpeciesService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,7 +44,7 @@ public class SpeciesController {
     public ResponseEntity<ApiResponse<SpeciesDTO>> updateSpecies(
             @PathVariable Long id,
             @Valid @RequestBody SpeciesDTO dto) {
-        dto.setId(id); // gán id từ path vào dto
+        dto.setId(id);
         return ApiResponse.success(
                 speciesService.updateSpecies(dto),
                 HttpStatus.OK.value(),
@@ -51,6 +52,7 @@ public class SpeciesController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<SpeciesDTO>> deleteSpecies(@PathVariable Long id) {
         return ApiResponse.success(
