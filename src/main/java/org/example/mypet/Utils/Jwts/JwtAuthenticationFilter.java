@@ -1,0 +1,90 @@
+package org.example.mypet.Utils.Jwts;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.mypet.DTO.Auth.CustomUserDetails;
+import org.example.mypet.DTO.Auth.LoginRequest;
+import org.example.mypet.DTO.User.UserDTO;
+import org.example.mypet.Service.CustomUserDetailService;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+@Slf4j
+@RequiredArgsConstructor
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final CustomUserDetailService userDetailsService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response) throws AuthenticationException {
+        try {
+            // Lấy dữ liệu login từ JSON body
+            LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+
+            return authenticationManager.authenticate(authToken);
+
+        } catch (IOException e) {
+            log.error("Error reading login request", e);
+            throw new AuthenticationException("Cannot read login request", e) {
+            };
+        }
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
+
+        String username = authResult.getName(); // Lấy username từ Authentication
+        CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
+
+        // Map sang DTO
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(userDetails.getId());
+        userDTO.setUsername(userDetails.getUsername());
+        userDTO.setRoles(userDetails.getRoles());
+
+        log.info("Successfully authenticated user: {}", userDTO);
+
+        // Tạo token
+        String accessToken = jwtService.generateAccessToken(userDTO);
+        String refreshToken = jwtService.generateRefreshToken(userDTO);
+
+        // Trả JSON
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        objectMapper.writeValue(response.getOutputStream(), tokens);
+    }
+
+
+    @Override
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response,
+                                              AuthenticationException failed) throws IOException, ServletException {
+        throw failed;
+    }
+}
