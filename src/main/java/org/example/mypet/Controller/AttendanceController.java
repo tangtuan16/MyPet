@@ -2,7 +2,6 @@ package org.example.mypet.Controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.mypet.DTO.User.AttendanceDTO;
-import org.example.mypet.Models.Attendance;
 import org.example.mypet.Service.AttendanceService;
 import org.example.mypet.Utils.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -32,9 +31,9 @@ public class AttendanceController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @attendanceService.getAttendance(#id).getEmployee().getId() == principal.id")
-    public ResponseEntity<ApiResponse<Attendance>> getAttendance(@PathVariable Long id) {
-        return ApiResponse.success(attendanceService.getAttendance(id), "Success");
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<AttendanceDTO>> getAttendance(@PathVariable Long id) {
+        return ApiResponse.success(attendanceService.getAttendanceDTO(id), "Success");
     }
 
     @PutMapping("/{id}")

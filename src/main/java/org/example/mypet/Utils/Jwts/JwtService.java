@@ -9,6 +9,7 @@ import org.example.mypet.Configs.JwtProperties;
 import org.example.mypet.DTO.Auth.JwtResponse;
 import org.example.mypet.DTO.Auth.RefreshTokenRequest;
 import org.example.mypet.DTO.User.UserDTO;
+import org.example.mypet.Models.Role;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -29,13 +30,11 @@ public class JwtService {
     public String generateAccessToken(UserDTO dto) {
         Date now = new Date();
         Date expDate = new Date(now.getTime() + jwtProperties.getAccessExpirationMs());
-        log.info("now: {}", now.toString());
-        log.info("expiration: {}", expDate);
         return Jwts.builder()
                 .setSubject(dto.getUsername())
                 .claim("userID", dto.getId())
                 .claim("roles", dto.getRoles().stream()
-                        .map(role -> role.getName()
+                        .map(Role::getName
                         ).collect(Collectors.toSet()))
                 .setIssuedAt(now)
                 .setExpiration(expDate)
@@ -57,7 +56,10 @@ public class JwtService {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(getSigningKey()).parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;

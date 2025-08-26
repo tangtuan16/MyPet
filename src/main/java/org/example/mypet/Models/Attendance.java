@@ -24,9 +24,9 @@ public class Attendance {
     @JoinColumn(name = "employee_id", nullable = false)
     private User employee;
 
-    private LocalDate workDate;   // ngày đi làm
+    private LocalDate workDate;
 
-    private Integer hoursWorked;  // số giờ làm trong ngày
+    private Integer hoursWorked;
 
-    private Boolean isAbsent;     // nghỉ hay không
+    private Boolean isAbsent;
 }

@@ -20,7 +20,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Lỗi validate @Valid
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -30,7 +29,6 @@ public class GlobalExceptionHandler {
         return ApiResponse.error("Validation failed", HttpStatus.BAD_REQUEST.value(), errors);
     }
 
-    // Sai username hoặc password
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<String>> handleBadCredentials(BadCredentialsException ex) {
         return ApiResponse.error(
@@ -47,7 +45,6 @@ public class GlobalExceptionHandler {
                 , ex.getMessage());
     }
 
-    // Token JWT không hợp lệ hoặc hết hạn
     @ExceptionHandler({JwtException.class, SignatureException.class})
     public ResponseEntity<ApiResponse<String>> handleJwtError(RuntimeException ex) {
         return ApiResponse.error(
@@ -57,26 +54,22 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // Lỗi nghiệp vụ & tự đoán mã lỗi
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<String>> handleRuntimeException(RuntimeException ex) {
         HttpStatus status = detectHttpStatus(ex);
         return ApiResponse.error(ex.getMessage(), status.value(), null);
     }
 
-    // Lỗi không mong đợi
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<String>> handleUnexpected(Exception ex) {
-        return ApiResponse.error("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), null);
+        return ApiResponse.error("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage());
     }
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
-        // true = nếu chuỗi chỉ toàn khoảng trắng → set thành null
         binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
     }
 
-    // Đoán mã lỗi dựa vào nội dung message
     private HttpStatus detectHttpStatus(RuntimeException ex) {
         String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
 

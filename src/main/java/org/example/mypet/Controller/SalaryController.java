@@ -29,13 +29,13 @@ public class SalaryController {
     }
 
     @GetMapping("/employee/{employeeId}")
-    @PreAuthorize("hasRole('ADMIN') or #employeeId == principal.id")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<Salary> getSalariesByEmployee(@PathVariable Long employeeId) {
         return salaryService.getSalariesByEmployee(employeeId);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @salaryService.getSalary(#id).employee.id == principal.id")
+    @PreAuthorize("hasRole('ADMIN')")
     public Salary getSalary(@PathVariable Long id) {
         return salaryService.getSalary(id);
     }

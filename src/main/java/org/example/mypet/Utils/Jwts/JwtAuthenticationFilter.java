@@ -2,12 +2,12 @@ package org.example.mypet.Utils.Jwts;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.mypet.DTO.Auth.CustomUserDetails;
+import org.example.mypet.DTO.Auth.JwtResponse;
 import org.example.mypet.DTO.Auth.LoginRequest;
 import org.example.mypet.DTO.User.UserDTO;
 import org.example.mypet.Service.CustomUserDetailService;
@@ -18,8 +18,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,7 +32,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request,
                                                 HttpServletResponse response) throws AuthenticationException {
         try {
-            // Lấy dữ liệu login từ JSON body
             LoginRequest loginRequest = objectMapper.readValue(request.getInputStream(), LoginRequest.class);
 
             UsernamePasswordAuthenticationToken authToken =
@@ -53,12 +50,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
+                                            Authentication authResult) throws IOException{
 
-        String username = authResult.getName(); // Lấy username từ Authentication
+        String username = authResult.getName();
         CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(username);
 
-        // Map sang DTO
         UserDTO userDTO = new UserDTO();
         userDTO.setId(userDetails.getId());
         userDTO.setUsername(userDetails.getUsername());
@@ -66,25 +62,21 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         log.info("Successfully authenticated user: {}", userDTO);
 
-        // Tạo token
         String accessToken = jwtService.generateAccessToken(userDTO);
         String refreshToken = jwtService.generateRefreshToken(userDTO);
 
-        // Trả JSON
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("accessToken", accessToken);
-        tokens.put("refreshToken", refreshToken);
+        JwtResponse tokenResponse = new JwtResponse(accessToken, refreshToken);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        objectMapper.writeValue(response.getOutputStream(), tokens);
+        objectMapper.writeValue(response.getOutputStream(), tokenResponse);
     }
 
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request,
                                               HttpServletResponse response,
-                                              AuthenticationException failed) throws IOException, ServletException {
+                                              AuthenticationException failed){
         throw failed;
     }
 }

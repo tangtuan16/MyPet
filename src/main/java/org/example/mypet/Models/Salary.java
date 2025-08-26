@@ -20,23 +20,18 @@ public class Salary {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Nhân viên nào
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private User employee;
 
-    // Tháng + Năm
     private Integer month;
     private Integer year;
 
-    // Số giờ làm trong tháng
     private Integer workingHours;
 
-    // Lương cơ bản (theo hợp đồng hoặc rate)
     private Double rate;
 
-    // Tổng lương (có thể = baseSalary hoặc tính từ giờ làm * rate)
     private Double totalSalary;
 
-    private LocalDate payDate; // Ngày trả lương
+    private LocalDate payDate;
 }

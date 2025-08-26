@@ -21,15 +21,15 @@ public class User {
     private long id;
     @Column(unique = true, nullable = false)
     private String username;
-    @Column(unique = false, nullable = false)
+    @Column(nullable = false)
     private String password;
-    @Column(unique = false, nullable = false)
+    @Column(nullable = false)
     private String name;
     @Column(unique = true, nullable = false)
     private String email;
     @Column(unique = true, nullable = false)
     private String phone;
-    @Column(unique = false, nullable = false)
+    @Column(nullable = false)
     private String address;
 
     @ManyToMany(fetch = FetchType.EAGER)
